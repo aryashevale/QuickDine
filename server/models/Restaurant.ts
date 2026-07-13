@@ -1,32 +1,56 @@
-import { Schema, Document, model } from 'mongoose';
+import { Schema, Document, model, Types } from 'mongoose';
 
-export interface IUser extends Document {
+export interface IRestaurant extends Document {
     name: string;
-    email: string;
-    password?: string;
-    phone?: string;
-    role: "user" | "admin" | "owner";
+    slug: string;
+    description: string;
+    cuisine: string;
+    priceRange: "$" | "$$" | "$$$" | "$$$$";
+    rating: number;
+    reviewCount: number;
+    location: string;
+    address: string;
+    image: string;
+    chef: string;
+    tags: string[];
+    availableSlots: string[];
+    featured: boolean;
+    exclusive: boolean;
+    owner: Types.ObjectId;
+    status: "pending" | "approved" | "rejected";
+    totalSeats: number;
     createdAt: Date;
     updatedAt: Date;
+
 }
 
-const UserSchema = new Schema<IUser>(
+const RestaurantSchema = new Schema<IRestaurant>(
     {
         name: { type: String, required: true, trim: true },
-        email: { type: String, required: true, unique: true, trim: true },
-        password: { type: String, required: true, minlength: 6 },
-        phone: { type: String, trim: true, minlength: 6 },
-        role: { type: String, enum: ["user", "admin", "owner"], default: "user" }
+        slug: { type: String, required: true, unique: true, trim: true, lowercase: true },
+        description: { type: String, required: true},
+        cuisine: { type: String, trim: true, required: true},
+        priceRange: { type: String, enum: ["$", "$$", "$$$", "$$$$"], required: true},
+        rating: {type: Number, default: 5.0, min: 1, max: 5},
+        reviewCount: {type: Number, default: 0},
+        location: {type: String, required: true, trim: true },
+        address: {type: String, required: true},
+        image: {type: String, default: ""},
+        chef: {type: String, required: true },
+        tags:[{type:String}],
+        availableSlots: [{type: String}],
+        featured: {type: Boolean, default: false},
+        exclusive: {type: Boolean, default: false},
+        owner: {type: Schema.Types.ObjectId, ref: "User", required: true},
+        status: { type: String, enum: ["pending", "approved", "rejected"], default: "pending"},
+        totalSeats: {type: Number, default: 20 },
+
+
+
     }, 
     { timestamps: true }
 );
 
-UserSchema.set("toJSON", {
-    transform: (doc, ret) =>{
-        delete ret.password;
-        return ret;
-    }
-})
 
 
-export const User = model<IUser>('User', UserSchema);
+export const Restaurant = model<IRestaurant>('Restaurant', RestaurantSchema); 
